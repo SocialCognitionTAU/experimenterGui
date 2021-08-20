@@ -1,0 +1,18 @@
+.toolba-component{
+    display: flex;
+    flex-direction: column;
+    align-content: space-evenly;
+    margin-bottom: 20px;
+}
+
+.toolbar-style{
+    min-height: 0 !important;
+    height: 55px !important;
+    background-color:blueviolet;
+}
+
+.button-style{
+    color: white !important;
+    width: 150px;
+    height: 55px;
+}

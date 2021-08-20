@@ -1,0 +1,99 @@
+.download-button {
+    height: 15px;
+    width: 8px;
+    border-radius: 4px;
+    display: flex;
+    align-self: center;
+    border-color: lightgrey;
+}
+
+.chosen-participant {
+    background-color: blueviolet;
+    border-color: blueviolet;
+    height: 15px;
+    width: 8px;
+    border-radius: 4px;
+    display: flex;
+    align-self: center;
+}
+
+table {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-items: center;
+}
+
+tr {
+    display: flex;
+    min-width: 0;
+}
+
+td,
+th {
+    display: flex;
+    justify-content: space-around;
+    width: 150px;
+    align-items: center;
+}
+
+.id {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.id:hover {
+    text-overflow: clip;
+    white-space: normal;
+    word-break: break-all;
+}
+
+h1,
+h2 {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.data-controls{
+    display: flex;
+    justify-content: space-around;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.select-all{
+    margin-left: 30px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+label {
+    margin-left: 5px;
+    margin-top: 9px;
+}
+
+.table-metadata{
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 30px;
+}
+
+.download-csv{
+    background-color:#1976d2;
+    color: white;
+    border:none;
+    border-radius: 4px;
+    height: 35px;
+    width: 150px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.experimenter-name:hover{
+    color: blueviolet;
+    cursor: pointer;
+}

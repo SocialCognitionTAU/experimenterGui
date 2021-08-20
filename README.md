@@ -1,1 +1,1 @@
-experimenterGui
+experimenter-gui
