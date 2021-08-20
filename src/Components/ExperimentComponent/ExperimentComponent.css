@@ -8,8 +8,8 @@
 }
 
 .chosen-participant {
-    background-color: blueviolet;
-    border-color: blueviolet;
+    background-color: lightskyblue;
+    border-color: lightskyblue;
     height: 15px;
     width: 8px;
     border-radius: 4px;
@@ -94,6 +94,6 @@ label {
 }
 
 .experimenter-name:hover{
-    color: blueviolet;
+    color: lightskyblue;
     cursor: pointer;
 }
