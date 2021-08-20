@@ -8,6 +8,12 @@ class SearchComponent extends Component{
         this.state = {value:"", items: props.items, original: props.items}
     }
 
+    componentDidUpdate(prevProps) {
+        if (prevProps.items != this.props.items) {
+            this.setState({items: this.props.items, original: this.props.items});
+        }
+    }
+
     handlChange = (event) => {
         let newValue = event.target.value;
         this.setState({value: newValue});
@@ -17,8 +23,9 @@ class SearchComponent extends Component{
     filterItems = (value) => {
         let array = this.state.original.map(x => x);
         const filtered = array.filter(item => {
-            return item.toLowerCase().includes(value.toLocaleLowerCase());
+            return item.toLowerCase().includes(value.toLowerCase());
         });
+
         this.setState({items: filtered});
     }
 
@@ -38,7 +45,7 @@ class SearchComponent extends Component{
             <div key={this.props.items} className="container">
                 <h2>{this.props.text}</h2>
                 <input className="textbox" type="text"  value={this.state.value} onChange={this.handlChange} placeholder={"Filter..."} />
-                <this.ItemList items={this.props.items}></this.ItemList>
+                <this.ItemList items={this.state.items}></this.ItemList>
             </div>
         )
     }
