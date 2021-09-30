@@ -1,7 +1,7 @@
 import { Component } from 'react';
 import "./ExperimentComponent.css"
 import { withRouter } from 'react-router-dom';
-import JsonService from '../../Services/jsonServie';
+import JsonService from '../../Services/jsonService';
 import DataService from '../../Services/DataService';
 
 class ExperimentComponent extends Component{
