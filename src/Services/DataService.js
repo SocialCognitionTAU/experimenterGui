@@ -18,6 +18,15 @@ class DataService {
 
         return data.data;
     }
+
+    isAuthorised = async(password) => {
+        try {
+            let response = await axios.post("https://socialcog.xyz/authorisation", { "gui_password": password})
+            return response.data == "authorised";
+        } catch (err) {
+            return false;
+        }
+    }
 }
 
 export default DataService;
