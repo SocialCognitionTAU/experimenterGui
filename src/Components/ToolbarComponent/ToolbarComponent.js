@@ -6,7 +6,13 @@ import {withRouter} from 'react-router-dom';
 
 class TooolbarComponent extends Component{
     handleClick = () => {
-        this.props.history.push("/");
+        console.log("this.props")
+        if (this.props.location == "/") {
+            this.props.history.push("/");
+        } else {
+            this.props.history.push("/home");
+        }
+        
     }
     render(){
         return (
