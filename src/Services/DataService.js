@@ -14,7 +14,7 @@ class DataService {
     }
 
     getExperimentData = async(experimentName) => {
-        let data =  await axios.get("https://socialcog.xyz/results/" + experimentName);
+        let data =  await axios.post("https://socialcog.xyz/results/" + experimentName, {social_cog_security_token : "some_token"});
 
         return data.data;
     }
