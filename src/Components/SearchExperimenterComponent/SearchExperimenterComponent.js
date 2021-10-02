@@ -28,7 +28,7 @@ class SearchExperimenterComponent extends Component{
 
     render() {
         if (!this.props.isAuthorised) {
-            return null;
+            return <Redirect to="/"/>;
         }
 
         if (this.state.redirect) {

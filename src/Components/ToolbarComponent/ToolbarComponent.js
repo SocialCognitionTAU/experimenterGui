@@ -5,9 +5,12 @@ import './ToolbarComponent.css';
 import {withRouter} from 'react-router-dom';
 
 class TooolbarComponent extends Component{
+    constructor(props){
+        super(props);
+    }
+
     handleClick = () => {
-        console.log("this.props")
-        if (this.props.location == "/") {
+        if (!this.props.authorised) {
             this.props.history.push("/");
         } else {
             this.props.history.push("/home");

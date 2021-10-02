@@ -19,7 +19,7 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <ToolbarComponent className="item"></ToolbarComponent>
+        <ToolbarComponent className="item" authorised={this.state.isAuthorised}></ToolbarComponent>
         <Switch>
           <Route exact path="/" component={() => (<LoginComponent authorise={this.authorised} />)}/>
           <Route exact path="/searchExperiment/:experimenterName" component={SearchExperimentComponent} />
