@@ -27,6 +27,7 @@ class LoginComponent extends Component{
 
     render(){
         if(this.state.redirect) {
+            this.props.authorise(true);
             return <Redirect to="/home"/>;
         }
 

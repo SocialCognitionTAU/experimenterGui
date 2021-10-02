@@ -1,11 +1,12 @@
 import { Component } from 'react';
 import SearchComponent from '../SearchComponent/SearchComponent';
 import DataService from '../../Services/DataService';
+import { Redirect } from 'react-router-dom';
 
 class SearchExperimenterComponent extends Component{
     constructor(props){
         super(props);
-        this.state = {experimenterNames: [], isFetching: false}
+        this.state = {experimenterNames: [], isFetching: false, redirect: false, redirectCompoennt: "/searchExperiment/"}
     }
 
     async componentDidMount(){
@@ -21,10 +22,19 @@ class SearchExperimenterComponent extends Component{
     }
 
     chooseExperimenter = (experimenterName) => {
-        this.props.history.push("/searchExperiment/" + experimenterName);
+        let address = this.state.redirectCompoennt + experimenterName;
+        this.setState({redirect: true, redirectCompoennt: address})
     }
 
     render() {
+        if (!this.props.isAuthorised) {
+            return null;
+        }
+
+        if (this.state.redirect) {
+            return <Redirect to={this.state.redirectCompoennt} />;
+        }
+
         return (
             <div className="container">
                 <SearchComponent chooseItem={this.chooseExperimenter} items={this.state.experimenterNames} text="choose experimenter" />
