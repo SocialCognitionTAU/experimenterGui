@@ -20,7 +20,6 @@ class FilterComponent extends React.Component {
 
     
   render() {
-      console.log(this.props.options)
     if (!this.props.options || !this.props.options.length > 1){
         return null;
     }

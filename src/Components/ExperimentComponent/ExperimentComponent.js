@@ -8,7 +8,7 @@ import FilterComponent from './filterComponent';
 class ExperimentComponent extends Component{
     constructor(props){
         super(props);
-        this.state = {experimenterName: this.props.match.params.experimenterName, experimentName: this.props.match.params.experimentName, participants: [], ids: [], chooseAll: true };
+        this.state = {experimenterName: this.props.match.params.experimenterName, experimentName: this.props.match.params.experimentName, participants: [], ids: [], chooseAll: true, filteredVersions: [], filteredConditions: [] };
     }
 
     async componentDidMount(){
@@ -20,29 +20,27 @@ class ExperimentComponent extends Component{
         let data = await dataService.getExperimentData(this.state.experimentName);
         let ids = data.map(participant => participant._id);
         let versions = data.map(item => item.version)
-        versions = data.filter((item, index) => data.indexOf(item) === index);
+        versions = versions.filter((item, index) => versions.indexOf(item) === index);
         let conditions = data.map(item => item.condition);
-        conditions = data.filter((item, index) => data.indexOf(item) === index);
+        conditions = conditions.filter((item, index) => conditions.indexOf(item) === index);
         let versions2 = [];
         let conditions2 = [];
 
         versions.forEach(item => {
             let object = {
-                value: item.version,
-                label: item.version
+                value: item,
+                label: item
             }
             versions2.push(object);
         });
 
         conditions.forEach(item => {
             let object = {
-                value: item.condition,
-                label: item.condition
+                value: item,
+                label: item
             }
             conditions2.push(object);
         });
-
-        console.log(versions2)
 
         this.setState({data: data, participants:data, ids: ids, versions: versions2, conditions: conditions2})
     }
@@ -106,14 +104,11 @@ class ExperimentComponent extends Component{
             this.setState({ids:[], chooseAll:false});
         } else {
             let newIds = this.state.participants.map(item => item._id);
-            console.log("in chooseAll")
-            console.log(this.state)
             this.setState({ids: newIds, chooseAll: true});
         }
     }
 
     getTableLine = (participantData) => {
-        console.log(participantData)
         let id = participantData._id;
         let chosen = this.state.ids.includes(id);
         return(
@@ -145,13 +140,22 @@ class ExperimentComponent extends Component{
     }
 
     filterByVersion = (selectedVersions) => {
+        this.setState({filteredVersions: selectedVersions});
+        
+        this.filter(selectedVersions, this.state.filteredConditions);
+    }
+
+    filter = (selectedVersions, selectedConditions) => {
         let ids = [];
 
         this.state.data.forEach(participant => {
-            if (selectedVersions.includes(participant.version) && this.state.ids.includes(participant._id)) {
-                ids.push(participant._id)
+            if (selectedVersions.includes(participant.version) || selectedVersions.length == 0) {
+                if (selectedConditions.includes(participant.condition) || selectedConditions.length == 0) {
+                    ids.push(participant._id);
+                }
             }
-        })
+
+        });
 
         let areAllChosen = ids.length == this.state.data.length;
 
@@ -159,17 +163,9 @@ class ExperimentComponent extends Component{
     }
 
     filterByCondition = (selectedConditions) => {
-        let ids = [];
-
-        this.state.data.forEach(participant => {
-            if (selectedConditions.includes(participant.condition) && this.state.ids.includes(participant._id)) {
-                ids.push(participant._id)
-            }
-        })
-
-        let areAllChosen = ids.length == this.state.data.length;
-
-        this.setState({ids: ids, chooseAll: areAllChosen});
+        this.setState({filteredConditions: selectedConditions});
+        
+        this.filter(this.state.filteredVersions, selectedConditions);
     }
 
     render(){
