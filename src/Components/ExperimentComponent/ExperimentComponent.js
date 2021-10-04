@@ -19,9 +19,12 @@ class ExperimentComponent extends Component{
         let dataService = new DataService();
         let data = await dataService.getExperimentData(this.state.experimentName);
         let ids = data.map(participant => participant._id);
-        let versions = data.filter((item, index) => data.indexOf(item) === index);
-        
+        let versions = data.map(item => item.version)
+        versions = data.filter((item, index) => data.indexOf(item) === index);
+        let conditions = data.map(item => item.condition);
+        conditions = data.filter((item, index) => data.indexOf(item) === index);
         let versions2 = [];
+        let conditions2 = [];
 
         versions.forEach(item => {
             let object = {
@@ -29,11 +32,19 @@ class ExperimentComponent extends Component{
                 label: item.version
             }
             versions2.push(object);
-        })
+        });
+
+        conditions.forEach(item => {
+            let object = {
+                value: item.condition,
+                label: item.condition
+            }
+            conditions2.push(object);
+        });
 
         console.log(versions2)
 
-        this.setState({data: data, participants:data, ids: ids, versions: versions2})
+        this.setState({data: data, participants:data, ids: ids, versions: versions2, conditions: conditions2})
     }
 
     getTable = () => {
@@ -137,7 +148,21 @@ class ExperimentComponent extends Component{
         let ids = [];
 
         this.state.data.forEach(participant => {
-            if (selectedVersions.includes(participant.version)) {
+            if (selectedVersions.includes(participant.version) && this.state.ids.includes(participant._id)) {
+                ids.push(participant._id)
+            }
+        })
+
+        let areAllChosen = ids.length == this.state.data.length;
+
+        this.setState({ids: ids, chooseAll: areAllChosen});
+    }
+
+    filterByCondition = (selectedConditions) => {
+        let ids = [];
+
+        this.state.data.forEach(participant => {
+            if (selectedConditions.includes(participant.condition) && this.state.ids.includes(participant._id)) {
                 ids.push(participant._id)
             }
         })
@@ -172,6 +197,7 @@ class ExperimentComponent extends Component{
                     </div>
                     <div className="filters">
                     <FilterComponent onSelectCallback={this.filterByVersion.bind(this)} placeholder="filter by version" options={this.state.versions}></FilterComponent>
+                    <FilterComponent onSelectCallback={this.filterByCondition.bind(this)} placeholder="filter by condition" options={this.state.conditions}></FilterComponent>
                 </div>
                 <this.getTable></this.getTable>
                 </div>
