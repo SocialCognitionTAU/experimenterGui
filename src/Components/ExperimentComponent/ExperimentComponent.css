@@ -97,3 +97,7 @@ label {
     color: lightskyblue;
     cursor: pointer;
 }
+
+.filters {
+    margin-bottom: 10px;
+}

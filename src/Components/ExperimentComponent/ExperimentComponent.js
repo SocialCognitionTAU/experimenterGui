@@ -3,6 +3,7 @@ import "./ExperimentComponent.css"
 import { withRouter } from 'react-router-dom';
 import JsonService from '../../Services/jsonService';
 import DataService from '../../Services/DataService';
+import FilterComponent from './filterComponent';
 
 class ExperimentComponent extends Component{
     constructor(props){
@@ -18,9 +19,21 @@ class ExperimentComponent extends Component{
         let dataService = new DataService();
         let data = await dataService.getExperimentData(this.state.experimentName);
         let ids = data.map(participant => participant._id);
-        console.log(data)
+        let versions = data.filter((item, index) => data.indexOf(item) === index);
+        
+        let versions2 = [];
 
-        this.setState({data: data, participants:data, ids: ids})
+        versions.forEach(item => {
+            let object = {
+                value: item.version,
+                label: item.version
+            }
+            versions2.push(object);
+        })
+
+        console.log(versions2)
+
+        this.setState({data: data, participants:data, ids: ids, versions: versions2})
     }
 
     getTable = () => {
@@ -120,6 +133,20 @@ class ExperimentComponent extends Component{
         e.exportFile(data, this.state.experimentName);
     }
 
+    filterByVersion = (selectedVersions) => {
+        let ids = [];
+
+        this.state.data.forEach(participant => {
+            if (selectedVersions.includes(participant.version)) {
+                ids.push(participant._id)
+            }
+        })
+
+        let areAllChosen = ids.length == this.state.data.length;
+
+        this.setState({ids: ids, chooseAll: areAllChosen});
+    }
+
     render(){
         return (
             <div className="container">
@@ -143,6 +170,9 @@ class ExperimentComponent extends Component{
                     <label>{this.state.ids.length}</label>
                     </div>
                     </div>
+                    <div className="filters">
+                    <FilterComponent onSelectCallback={this.filterByVersion.bind(this)} placeholder="filter by version" options={this.state.versions}></FilterComponent>
+                </div>
                 <this.getTable></this.getTable>
                 </div>
                
