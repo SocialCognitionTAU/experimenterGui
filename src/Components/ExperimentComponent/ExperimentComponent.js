@@ -4,14 +4,16 @@ import { withRouter } from 'react-router-dom';
 import JsonService from '../../Services/jsonService';
 import DataService from '../../Services/DataService';
 import FilterComponent from './filterComponent';
+import DateRangePicker from '@wojtekmaj/react-daterange-picker';
+import moment from 'moment';
 
-class ExperimentComponent extends Component{
-    constructor(props){
+class ExperimentComponent extends Component {
+    constructor(props) {
         super(props);
-        this.state = {experimenterName: this.props.match.params.experimenterName, experimentName: this.props.match.params.experimentName, participants: [], ids: [], chooseAll: true, filteredVersions: [], filteredConditions: [] };
+        this.state = { experimenterName: this.props.match.params.experimenterName, experimentName: this.props.match.params.experimentName, participants: [], ids: [], chooseAll: true, filteredVersions: [], filteredConditions: [] };
     }
 
-    async componentDidMount(){
+    async componentDidMount() {
         await this.fetchData();
     }
 
@@ -42,24 +44,29 @@ class ExperimentComponent extends Component{
             conditions2.push(object);
         });
 
-        this.setState({data: data, participants:data, ids: ids, versions: versions2, conditions: conditions2})
+        let dates = data.map(item => moment(item.createdAt));
+
+        let maxDate = moment.max(dates);
+        let minDate = moment.min(dates);
+
+        this.setState({ data: data, participants: data, ids: ids, versions: versions2, conditions: conditions2, minDate: minDate, maxDate: maxDate })
     }
 
     getTable = () => {
         return (
             <table>
                 <thead>
-                {this.getHeaders()}
+                    {this.getHeaders()}
                 </thead>
                 <tbody>
-                {this.getTableLines()}
+                    {this.getTableLines()}
                 </tbody>
             </table>
         );
     }
 
     getHeaders = () => {
-        return(
+        return (
             <tr className="table-row">
                 <th>Download</th>
                 <th>Version</th>
@@ -80,40 +87,40 @@ class ExperimentComponent extends Component{
     }
 
     onClick = (id) => {
-        if (this.state.chooseAll){
-            this.setState({chooseAll: false});
+        if (this.state.chooseAll) {
+            this.setState({ chooseAll: false });
         }
 
         let newIds = this.state.ids;
 
-        if (!this.state.ids.includes(id)){
+        if (!this.state.ids.includes(id)) {
             newIds.push(id);
 
-            if (newIds.length == this.state.participants.length){
-                this.setState({chooseAll: true});
+            if (newIds.length == this.state.participants.length) {
+                this.setState({ chooseAll: true });
             }
         } else {
             newIds = newIds.filter(item => item != id);
         }
 
-        this.setState({ids: newIds});
+        this.setState({ ids: newIds });
     }
 
     chooseAll = () => {
-        if (this.state.chooseAll){
-            this.setState({ids:[], chooseAll:false});
+        if (this.state.chooseAll) {
+            this.setState({ ids: [], chooseAll: false });
         } else {
             let newIds = this.state.participants.map(item => item._id);
-            this.setState({ids: newIds, chooseAll: true});
+            this.setState({ ids: newIds, chooseAll: true });
         }
     }
 
     getTableLine = (participantData) => {
         let id = participantData._id;
         let chosen = this.state.ids.includes(id);
-        return(
+        return (
             <tr className="table-row" key={id}>
-                <td><button onClick={this.onClick.bind(this, id)} className={(chosen) ? "chosen-participant" : "download-button"}/></td>
+                <td><button onClick={this.onClick.bind(this, id)} className={(chosen) ? "chosen-participant" : "download-button"} /></td>
                 <td> <div className="id">{participantData.version ? participantData.version : "Missing"}</div></td>
                 <td> <div className="id">{participantData.condition ? participantData.condition : "Missing"}</div></td>
                 <td> <div className="id">{participantData.subjectId ? participantData.subjectId : "Missing"}</div></td>
@@ -123,7 +130,7 @@ class ExperimentComponent extends Component{
 
     goToExperimenterPage = () => {
         this.props.history.goBack();
-        
+
     }
 
     download = () => {
@@ -140,15 +147,31 @@ class ExperimentComponent extends Component{
     }
 
     filterByVersion = (selectedVersions) => {
-        this.setState({filteredVersions: selectedVersions});
-        
+        this.setState({ filteredVersions: selectedVersions });
+
         this.filter(selectedVersions, this.state.filteredConditions);
     }
 
     filter = (selectedVersions, selectedConditions) => {
+        let ids = this.filterArray(selectedVersions, selectedConditions, this.state.data);
+        let areAllChosen = ids.length == this.state.data.length;
+
+    
+        this.setState({ ids: ids, chooseAll: areAllChosen });
+    }
+
+    filterArray(selectedVersions, selectedConditions, array) {
+        if (!selectedConditions && !selectedVersions) {
+            selectedVersions = [];
+            selectedConditions = [];
+        }
+
         let ids = [];
 
-        this.state.data.forEach(participant => {
+        console.log(selectedConditions)
+        console.log(selectedVersions)
+
+        array.forEach(participant => {
             if (selectedVersions.includes(participant.version) || selectedVersions.length == 0) {
                 if (selectedConditions.includes(participant.condition) || selectedConditions.length == 0) {
                     ids.push(participant._id);
@@ -157,47 +180,71 @@ class ExperimentComponent extends Component{
 
         });
 
-        let areAllChosen = ids.length == this.state.data.length;
-
-        this.setState({ids: ids, chooseAll: areAllChosen});
+        return ids;
     }
 
     filterByCondition = (selectedConditions) => {
-        this.setState({filteredConditions: selectedConditions});
-        
+        this.setState({ filteredConditions: selectedConditions });
+
         this.filter(this.state.filteredVersions, selectedConditions);
     }
 
-    render(){
+    onDateChange = (value) => {
+
+        if (value == null) {
+            let newIds = this.state.data.map(participant => participant._id);
+
+            newIds = this.filterArray(this.state.filteredVersions, this.state.filteredConditions ,this.state.data);
+
+            this.setState({ ids: newIds });
+        } else {
+            this.setState({ minDate: value[0], maxDate: value[1] });
+
+            let newIds = [];
+
+            this.state.data.forEach(participant => {
+                if (this.state.ids.includes(participant._id) && moment(participant.createdAt).isBetween(value[0], value[1])) {
+                    newIds.push(participant._id);
+                }
+            });
+
+            this.setState({ ids: newIds });
+        }
+    }
+
+    render() {
         return (
             <div className="container">
                 <h1 className="experimenter-name" onClick={this.goToExperimenterPage.bind(this)}>{this.props.match.params.experimenterName}</h1>
                 <h2>{this.props.match.params.experimentName}</h2>
                 <div className="experiment-body">
-                <div className="data-controls">
-                <div className="select-all">
-                  <button className={this.state.chooseAll ? "chosen-participant" : "download-button"} onClick={this.chooseAll.bind(this)}></button>  
-                  <label>{"Select all"}</label>
-                  </div>
-                  <button onClick={this.download.bind(this)} className="download-csv">{"Download Experiment Data"}</button>
-                </div>
-                <div className="table-metadata">
-                    <div>
-                    <label>{"Number of participants:"}</label>
-                    <label>{this.state.participants.length}</label>
+                    <div className="data-controls">
+                        <div className="select-all">
+                            <button className={this.state.chooseAll ? "chosen-participant" : "download-button"} onClick={this.chooseAll.bind(this)}></button>
+                            <label>{"Select all"}</label>
+                        </div>
+                        <button onClick={this.download.bind(this)} className="download-csv">{"Download Experiment Data"}</button>
                     </div>
-                    <div>
-                    <label>{"Selected:"}</label>
-                    <label>{this.state.ids.length}</label>
-                    </div>
+                    <div className="table-metadata">
+                        <div>
+                            <label>{"Number of participants:"}</label>
+                            <label>{this.state.participants.length}</label>
+                        </div>
+                        <div>
+                            <label>{"Selected:"}</label>
+                            <label>{this.state.ids.length}</label>
+                        </div>
                     </div>
                     <div className="filters">
-                    <FilterComponent onSelectCallback={this.filterByVersion.bind(this)} placeholder="filter by version" options={this.state.versions}></FilterComponent>
-                    <FilterComponent onSelectCallback={this.filterByCondition.bind(this)} placeholder="filter by condition" options={this.state.conditions}></FilterComponent>
+                        <FilterComponent onSelectCallback={this.filterByVersion.bind(this)} placeholder="filter by version" options={this.state.versions}></FilterComponent>
+                        <FilterComponent onSelectCallback={this.filterByCondition.bind(this)} placeholder="filter by condition" options={this.state.conditions}></FilterComponent>
+                    </div>
+                    <div>
+                        <p>Download results by date: <DateRangePicker format="dd-MM-y" onChange={this.onDateChange.bind(this)} value={[this.state.minDate, this.state.maxDate]} /></p>
+                    </div>
+                    <this.getTable></this.getTable>
                 </div>
-                <this.getTable></this.getTable>
-                </div>
-               
+
             </div>
         );
     }
